@@ -1,6 +1,7 @@
 package com.sefa.sensor.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +10,7 @@ import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
 import com.sefa.sensor.exceptions.DuplicateSensorNameException;
+import com.sefa.sensor.exceptions.SensorNotFoundException;
 
 @Service
 public class SensorService {
@@ -40,5 +42,13 @@ public class SensorService {
     public List<Sensor> findAll() {
 
         return repository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Sensor findById(Long id) {
+
+        Optional<Sensor> sensorOpt = repository.findById(id);
+
+        return sensorOpt.orElseThrow(() -> new SensorNotFoundException("Sensor bulunamadi: id=" + id));
     }
 }

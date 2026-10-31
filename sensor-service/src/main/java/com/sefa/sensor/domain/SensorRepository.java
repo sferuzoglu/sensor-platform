@@ -9,4 +9,5 @@ public interface SensorRepository extends JpaRepository<Sensor, Long> {
     List<Sensor> findByType(SensorType type);
 
     boolean existsByName(String name);
+
 }

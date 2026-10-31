@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.sefa.sensor.exceptions.DuplicateSensorNameException;
+import com.sefa.sensor.exceptions.SensorNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -34,6 +35,14 @@ public class GlobalExceptionHandler {
         log.warn("Veri bütünlüğü ihlali", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
                 "Bu isimde bir sensör zaten var.");
+    }
+
+    @ExceptionHandler
+    public ProblemDetail sensorNotFoundExceptionHandler(SensorNotFoundException e) {
+
+        log.info("{}", e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
+                "Sensor Bulunamadi");
     }
 
     @ExceptionHandler
