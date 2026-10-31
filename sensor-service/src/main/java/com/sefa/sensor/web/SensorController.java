@@ -1,0 +1,46 @@
+package com.sefa.sensor.web;
+
+import java.net.URI;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import com.sefa.sensor.domain.Sensor;
+import com.sefa.sensor.service.SensorService;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/sensors")
+public class SensorController {
+
+    private final SensorService service;
+
+    public SensorController(SensorService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<SensorResponse> create(@RequestBody @Valid CreateSensorRequest req) {
+
+        Sensor sensor = service.create(req.name(), req.type(), req.latitude(), req.longitude());
+        SensorResponse sensorResponse = SensorResponse.from(sensor);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}").buildAndExpand(sensor.getId()).toUri();
+
+        return ResponseEntity.created(location).body(sensorResponse);
+    }
+
+    @GetMapping
+    public List<SensorResponse> findAll() {
+
+        return service.findAll().stream().map(SensorResponse::from).toList();
+    }
+
+}

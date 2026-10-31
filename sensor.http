@@ -1,0 +1,53 @@
+### Sensör oluştur
+POST http://localhost:8080/api/sensors
+Content-Type: application/json
+
+{
+  "name": "istasyon-9",
+  "type": "HUMIDITY",
+  "latitude": 41.01,
+  "longitude": 28.97
+}
+### Sensör oluştur
+POST http://localhost:8080/api/sensors
+Content-Type: application/json
+
+{
+  "name": "",
+  "type": "HUMIDITY",
+  "latitude": 41.01,
+  "longitude": 28.97
+}
+
+### Sensör oluştur
+POST http://localhost:8080/api/sensors
+Content-Type: application/json
+
+{
+  "name": "istasyon-777",
+  "type": "HUMIDITY",
+  "longitude": 28.97
+}
+
+### Sensör oluştur
+POST http://localhost:8080/api/sensors
+Content-Type: application/json
+
+{
+  "name": "istasyon-9",
+  "type": "HUMIDITY",
+  "latitude": 500,
+  "longitude": -500
+}
+
+### Sensör oluştur
+POST http://localhost:8080/api/sensors
+Content-Type: application/json
+
+{
+  "name": "",
+  "latitude": 500,
+  "longitude": -500
+}
+### Tüm sensörler
+GET http://localhost:8080/api/sensors
