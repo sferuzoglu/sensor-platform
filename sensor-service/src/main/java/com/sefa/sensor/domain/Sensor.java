@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "sensors")
@@ -31,6 +32,9 @@ public class Sensor {
     private GeoLocation location;
 
     private boolean active;
+
+    @Version
+    private long version;
 
     @Column(name = "created_at")
     private Instant createdAt;

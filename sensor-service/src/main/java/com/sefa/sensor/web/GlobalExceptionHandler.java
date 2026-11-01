@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,6 +52,14 @@ public class GlobalExceptionHandler {
         log.info("{}", e.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
                 e.getMessage());
+    }
+
+    @ExceptionHandler
+    public ProblemDetail objectOptimisticLockingFailureExceptionHandler(ObjectOptimisticLockingFailureException e) {
+
+        log.info("{}", e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                "Kayıt başka biri tarafından değiştirildi. Lütfen yenileyip tekrar deneyin.");
     }
 
     @ExceptionHandler
