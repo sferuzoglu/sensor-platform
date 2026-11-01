@@ -80,6 +80,16 @@ public class Sensor {
         return active;
     }
 
+    public void deactivate() {
+
+        if (!active) {
+
+            throw new IllegalStateException("Sensor zaten pasif. sensor adı:" + name);
+        }
+
+        active = false;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }

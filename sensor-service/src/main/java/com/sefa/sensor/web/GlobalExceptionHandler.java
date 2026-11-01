@@ -46,6 +46,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
+    public ProblemDetail illegalStateExceptionHandler(IllegalStateException e) {
+
+        log.info("{}", e.getMessage());
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                e.getMessage());
+    }
+
+    @ExceptionHandler
     public ProblemDetail methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
 
         List<FieldError> fieldErrors = e.getBindingResult().getFieldErrors();

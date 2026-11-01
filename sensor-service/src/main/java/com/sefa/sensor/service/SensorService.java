@@ -52,4 +52,17 @@ public class SensorService {
 
         return sensorOpt.orElseThrow(() -> new SensorNotFoundException("Sensor bulunamadi: id=" + id));
     }
+
+    @Transactional
+    public Sensor deactivate(Long id) {
+
+        Optional<Sensor> sensorOpt = repository.findById(id);
+
+        Sensor sensor = sensorOpt.orElseThrow(() -> new SensorNotFoundException("Sensor bulunamadi: id=" + id));
+
+        sensor.deactivate();
+
+        return sensor;
+
+    }
 }

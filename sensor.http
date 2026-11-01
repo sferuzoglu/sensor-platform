@@ -3,7 +3,7 @@ POST http://localhost:8080/api/sensors
 Content-Type: application/json
 
 {
-  "name": "istasyon-9",
+  "name": "istasyon-78",
   "type": "HUMIDITY",
   "latitude": 41.01,
   "longitude": 28.97
@@ -53,4 +53,4 @@ Content-Type: application/json
 GET http://localhost:8080/api/sensors
 
 ### Tüm sensörler
-GET http://localhost:8080/api/sensors/abc
+POST http://localhost:8080/api/sensors/13/deactivate

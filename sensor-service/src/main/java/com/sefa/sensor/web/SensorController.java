@@ -51,4 +51,10 @@ public class SensorController {
         return SensorResponse.from(service.findById(id));
     }
 
+    @PostMapping("/{id}/deactivate")
+    public SensorResponse deactivate(@PathVariable Long id) {
+
+        return SensorResponse.from(service.deactivate(id));
+    }
+
 }
