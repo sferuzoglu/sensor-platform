@@ -1,0 +1,87 @@
+package com.sefa.sensor.web;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import com.sefa.sensor.TestcontainersConfiguration;
+import com.sefa.sensor.domain.Sensor;
+import com.sefa.sensor.domain.SensorRepository;
+import com.sefa.sensor.domain.SensorType;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@Import(TestcontainersConfiguration.class)
+public class SensorApiIntegrationTest {
+
+    @Autowired
+    MockMvc mockMvc;
+
+    @Autowired
+    SensorRepository sensorRepository;
+
+    @BeforeEach
+    void temizle() {
+        sensorRepository.deleteAllInBatch();
+    }
+
+    @Test
+    void gecerli_istek_201_doner() throws Exception {
+
+        mockMvc.perform(post("/api/sensors").contentType(MediaType.APPLICATION_JSON).content("""
+                {   "name": "istasyon-1",
+                    "type": "HUMIDITY",
+                    "latitude": 41.01,
+                    "longitude": 28.97}
+                """))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.id").exists());
+    }
+
+    @Test
+    void ayni_isim_kontrolu_409_doner() throws Exception {
+
+        sensorRepository.save(new Sensor("istasyon-1", SensorType.HUMIDITY, 38, 32, true));
+
+        mockMvc.perform(post("/api/sensors").contentType(MediaType.APPLICATION_JSON).content("""
+                {   "name": "istasyon-1",
+                    "type": "HUMIDITY",
+                    "latitude": 41.01,
+                    "longitude": 28.97}
+                """))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void hatali_parametre_400_doner() throws Exception {
+
+        mockMvc.perform(post("/api/sensors").contentType(MediaType.APPLICATION_JSON).content("""
+                {   "name": "istasyon-1",
+                    "type": "HUMIDITY",
+                    "latitude": 500,
+                    "longitude": 28.97}
+                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.latitude").exists());
+    }
+
+    @Test
+    void olmayan_id_404_doner() throws Exception {
+
+        mockMvc.perform(get("/api/sensors/99999"))
+                .andExpect(status().isNotFound());
+    }
+
+}
