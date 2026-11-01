@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.sefa.sensor.domain.GeoLocation;
 import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.service.SensorService;
 
@@ -30,7 +31,7 @@ public class SensorController {
     @PostMapping
     public ResponseEntity<SensorResponse> create(@RequestBody @Valid CreateSensorRequest req) {
 
-        Sensor sensor = service.create(req.name(), req.type(), req.latitude(), req.longitude());
+        Sensor sensor = service.create(req.name(), req.type(), new GeoLocation(req.latitude(), req.longitude()));
         SensorResponse sensorResponse = SensorResponse.from(sensor);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(sensor.getId()).toUri();

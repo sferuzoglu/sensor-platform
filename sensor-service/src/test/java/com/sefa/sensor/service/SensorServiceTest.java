@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sefa.sensor.domain.GeoLocation;
 import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
@@ -34,7 +35,7 @@ public class SensorServiceTest {
     void isim_kullanilmiyorsa_ekle() {
 
         when(repository.existsByName("istasyon_1")).thenReturn(false);
-        Sensor sensor = service.create("istasyon_1", SensorType.HUMIDITY, 38, 33);
+        Sensor sensor = service.create("istasyon_1", SensorType.HUMIDITY, new GeoLocation(38, 33));
 
         assertEquals("istasyon_1", sensor.getName());
 
@@ -47,7 +48,7 @@ public class SensorServiceTest {
         when(repository.existsByName("istasyon_1")).thenReturn(true);
 
         assertThrows(DuplicateSensorNameException.class,
-                () -> service.create("istasyon_1", SensorType.HUMIDITY, 38.0, 33.0));
+                () -> service.create("istasyon_1", SensorType.HUMIDITY, new GeoLocation(38, 33)));
 
         verify(repository, never()).save(any());
     }

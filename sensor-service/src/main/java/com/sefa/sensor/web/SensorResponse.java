@@ -10,7 +10,7 @@ public record SensorResponse(Long id, String name, SensorType type, double latit
 
     public static SensorResponse from(Sensor e) {
 
-        return new SensorResponse(e.getId(), e.getName(), e.getType(), e.getLatitude(),
-                e.getLongitude(), e.isActive(), e.getCreatedAt());
+        return new SensorResponse(e.getId(), e.getName(), e.getType(), e.getLocation().latitude(),
+                e.getLocation().longitude(), e.isActive(), e.getCreatedAt());
     }
 }

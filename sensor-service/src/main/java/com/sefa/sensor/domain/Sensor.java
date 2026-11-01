@@ -3,6 +3,7 @@ package com.sefa.sensor.domain;
 import java.time.Instant;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -26,9 +27,8 @@ public class Sensor {
     @Enumerated(EnumType.STRING)
     private SensorType type;
 
-    private double latitude;
-
-    private double longitude;
+    @Embedded
+    private GeoLocation location;
 
     private boolean active;
 
@@ -41,11 +41,10 @@ public class Sensor {
     protected Sensor() {
     }
 
-    public Sensor(String name, SensorType type, double latitude, double longitude, boolean active) {
+    public Sensor(String name, SensorType type, GeoLocation location, boolean active) {
         this.name = name;
         this.type = type;
-        this.latitude = latitude;
-        this.longitude = longitude;
+        this.location = location;
         this.active = active;
     }
 
@@ -73,12 +72,8 @@ public class Sensor {
         return type;
     }
 
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
+    public GeoLocation getLocation() {
+        return location;
     }
 
     public boolean isActive() {

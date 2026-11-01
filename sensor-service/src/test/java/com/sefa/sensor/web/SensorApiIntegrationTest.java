@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.sefa.sensor.TestcontainersConfiguration;
+import com.sefa.sensor.domain.GeoLocation;
 import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
@@ -53,7 +54,7 @@ public class SensorApiIntegrationTest {
     @Test
     void ayni_isim_kontrolu_409_doner() throws Exception {
 
-        sensorRepository.save(new Sensor("istasyon-1", SensorType.HUMIDITY, 38, 32, true));
+        sensorRepository.save(new Sensor("istasyon-1", SensorType.HUMIDITY, new GeoLocation(38, 33), true));
 
         mockMvc.perform(post("/api/sensors").contentType(MediaType.APPLICATION_JSON).content("""
                 {   "name": "istasyon-1",

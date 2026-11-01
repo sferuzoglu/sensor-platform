@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sefa.sensor.domain.GeoLocation;
 import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
@@ -22,7 +23,7 @@ public class SensorService {
     }
 
     @Transactional
-    public Sensor create(String name, SensorType type, double latitude, double longitude)
+    public Sensor create(String name, SensorType type, GeoLocation location)
             throws DuplicateSensorNameException {
 
         boolean existsByName = repository.existsByName(name);
@@ -32,7 +33,7 @@ public class SensorService {
             throw new DuplicateSensorNameException("Bu isimde bir sensör zaten var: " + name);
         }
 
-        Sensor sensor = new Sensor(name, type, latitude, longitude, true);
+        Sensor sensor = new Sensor(name, type, location, true);
         repository.save(sensor);
 
         return sensor;
