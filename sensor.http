@@ -53,4 +53,4 @@ Content-Type: application/json
 GET http://localhost:8080/api/sensors
 
 ### Tüm sensörler
-GET http://localhost:8080/api/sensors/2
+GET http://localhost:8080/api/sensors/abc
