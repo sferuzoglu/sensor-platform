@@ -1,0 +1,10 @@
+# Line endings: store and check out as LF everywhere, except Windows scripts
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binary files: never touch
+*.png binary
+*.jpg binary
+*.ico binary
+*.jar binary
