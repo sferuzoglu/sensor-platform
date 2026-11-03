@@ -26,35 +26,35 @@ import com.sefa.sensor.exceptions.SensorNotFoundException;
 public class SensorServiceTest {
 
     @Mock
-    SensorRepository repository; // sahte bağımlılık
+    SensorRepository repository; // mock dependency
 
     @InjectMocks
-    SensorService service; // sahteyi constructor'a enjekte eder
+    SensorService service; // injects the mock via the constructor
 
     @Test
-    void isim_kullanilmiyorsa_ekle() {
+    void creates_sensor_when_name_is_free() {
 
-        when(repository.existsByName("istasyon_1")).thenReturn(false);
-        Sensor sensor = service.create("istasyon_1", SensorType.HUMIDITY, new GeoLocation(38, 33));
+        when(repository.existsByName("station_1")).thenReturn(false);
+        Sensor sensor = service.create("station_1", SensorType.HUMIDITY, new GeoLocation(38, 33));
 
-        assertEquals("istasyon_1", sensor.getName());
+        assertEquals("station_1", sensor.getName());
 
         verify(repository).save(any());
     }
 
     @Test
-    void isim_kullaniliyorsa_ekleme() {
+    void rejects_duplicate_name() {
 
-        when(repository.existsByName("istasyon_1")).thenReturn(true);
+        when(repository.existsByName("station_1")).thenReturn(true);
 
         assertThrows(DuplicateSensorNameException.class,
-                () -> service.create("istasyon_1", SensorType.HUMIDITY, new GeoLocation(38, 33)));
+                () -> service.create("station_1", SensorType.HUMIDITY, new GeoLocation(38, 33)));
 
         verify(repository, never()).save(any());
     }
 
     @Test
-    void olmayan_id_testi() {
+    void throws_when_id_not_found() {
 
         when(repository.findById(7L)).thenReturn(Optional.empty());
 

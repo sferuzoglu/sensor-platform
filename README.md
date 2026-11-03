@@ -10,7 +10,7 @@ Sensörler kaydedilir, listelenir ve pasifleştirilir. Proje adım adım genişl
 | Backend | Java 21, Spring Boot 4, Spring Data JPA (Hibernate), Bean Validation, Spring Boot Actuator |
 | Veritabanı | PostgreSQL 16, Flyway |
 | Test | JUnit 5, Mockito, Testcontainers, MockMvc |
-| Frontend | React 19, TypeScript, Vite |
+| Frontend | React 19, TypeScript, Vite, MUI |
 | Altyapı | Docker Compose |
 
 ## Proje yapısı

@@ -30,7 +30,7 @@ public class SensorService {
 
         if (existsByName) {
 
-            throw new DuplicateSensorNameException("Bu isimde bir sensör zaten var: " + name);
+            throw new DuplicateSensorNameException("A sensor with this name already exists: " + name);
         }
 
         Sensor sensor = new Sensor(name, type, location, true);
@@ -50,7 +50,7 @@ public class SensorService {
 
         Optional<Sensor> sensorOpt = repository.findById(id);
 
-        return sensorOpt.orElseThrow(() -> new SensorNotFoundException("Sensor bulunamadi: id=" + id));
+        return sensorOpt.orElseThrow(() -> new SensorNotFoundException("Sensor not found: id=" + id));
     }
 
     @Transactional
@@ -58,7 +58,7 @@ public class SensorService {
 
         Optional<Sensor> sensorOpt = repository.findById(id);
 
-        Sensor sensor = sensorOpt.orElseThrow(() -> new SensorNotFoundException("Sensor bulunamadi: id=" + id));
+        Sensor sensor = sensorOpt.orElseThrow(() -> new SensorNotFoundException("Sensor not found: id=" + id));
 
         sensor.deactivate();
 

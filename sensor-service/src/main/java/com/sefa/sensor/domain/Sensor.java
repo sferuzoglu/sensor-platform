@@ -52,7 +52,7 @@ public class Sensor {
         this.active = active;
     }
 
-    /** Kayıt veritabanına ilk yazılmadan hemen önce Hibernate çağırır. */
+    /** Called by Hibernate right before the entity is first persisted. */
     @PrePersist
     void onCreate() {
         this.createdAt = Instant.now();
@@ -88,7 +88,7 @@ public class Sensor {
 
         if (!active) {
 
-            throw new IllegalStateException("Sensor zaten pasif. sensor adı:" + name);
+            throw new IllegalStateException("Sensor is already inactive: " + name);
         }
 
         active = false;

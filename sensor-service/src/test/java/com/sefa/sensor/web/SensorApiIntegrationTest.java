@@ -33,15 +33,15 @@ public class SensorApiIntegrationTest {
     SensorRepository sensorRepository;
 
     @BeforeEach
-    void temizle() {
+    void cleanUp() {
         sensorRepository.deleteAllInBatch();
     }
 
     @Test
-    void gecerli_istek_201_doner() throws Exception {
+    void valid_request_returns_201() throws Exception {
 
         mockMvc.perform(post("/api/sensors").contentType(MediaType.APPLICATION_JSON).content("""
-                {   "name": "istasyon-1",
+                {   "name": "station-1",
                     "type": "HUMIDITY",
                     "latitude": 41.01,
                     "longitude": 28.97}
@@ -52,12 +52,12 @@ public class SensorApiIntegrationTest {
     }
 
     @Test
-    void ayni_isim_kontrolu_409_doner() throws Exception {
+    void duplicate_name_returns_409() throws Exception {
 
-        sensorRepository.save(new Sensor("istasyon-1", SensorType.HUMIDITY, new GeoLocation(38, 33), true));
+        sensorRepository.save(new Sensor("station-1", SensorType.HUMIDITY, new GeoLocation(38, 33), true));
 
         mockMvc.perform(post("/api/sensors").contentType(MediaType.APPLICATION_JSON).content("""
-                {   "name": "istasyon-1",
+                {   "name": "station-1",
                     "type": "HUMIDITY",
                     "latitude": 41.01,
                     "longitude": 28.97}
@@ -66,10 +66,10 @@ public class SensorApiIntegrationTest {
     }
 
     @Test
-    void hatali_parametre_400_doner() throws Exception {
+    void invalid_parameter_returns_400() throws Exception {
 
         mockMvc.perform(post("/api/sensors").contentType(MediaType.APPLICATION_JSON).content("""
-                {   "name": "istasyon-1",
+                {   "name": "station-1",
                     "type": "HUMIDITY",
                     "latitude": 500,
                     "longitude": 28.97}
@@ -79,7 +79,7 @@ public class SensorApiIntegrationTest {
     }
 
     @Test
-    void olmayan_id_404_doner() throws Exception {
+    void unknown_id_returns_404() throws Exception {
 
         mockMvc.perform(get("/api/sensors/99999"))
                 .andExpect(status().isNotFound());

@@ -1,14 +1,14 @@
-### Sensör oluştur
+### Create sensor
 POST http://localhost:8080/api/sensors
 Content-Type: application/json
 
 {
-  "name": "istasyon-13",
+  "name": "station-13",
   "type": "HUMIDITY",
   "latitude": 41.01,
   "longitude": 28.97
 }
-### Sensör oluştur
+### Create sensor
 POST http://localhost:8080/api/sensors
 Content-Type: application/json
 
@@ -19,28 +19,28 @@ Content-Type: application/json
   "longitude": 28.97
 }
 
-### Sensör oluştur
+### Create sensor
 POST http://localhost:8080/api/sensors
 Content-Type: application/json
 
 {
-  "name": "istasyon-777",
+  "name": "station-777",
   "type": "HUMIDITY",
   "longitude": 28.97
 }
 
-### Sensör oluştur
+### Create sensor
 POST http://localhost:8080/api/sensors
 Content-Type: application/json
 
 {
-  "name": "istasyon-9",
+  "name": "station-9",
   "type": "HUMIDITY",
   "latitude": 500,
   "longitude": -500
 }
 
-### Sensör oluştur
+### Create sensor
 POST http://localhost:8080/api/sensors
 Content-Type: application/json
 
@@ -49,8 +49,8 @@ Content-Type: application/json
   "latitude": 500,
   "longitude": -500
 }
-### Tüm sensörler
+### All sensors
 GET http://localhost:8080/api/sensors
 
-### Tüm sensörler
+### All sensors
 POST http://localhost:8080/api/sensors/14/deactivate

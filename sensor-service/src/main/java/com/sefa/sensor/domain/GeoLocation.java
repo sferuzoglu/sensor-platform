@@ -9,10 +9,10 @@ public record GeoLocation(double latitude, double longitude) {
 
         if (latitude < -90 || latitude > 90) {
 
-            throw new IllegalArgumentException("enlem aralık dışında. enlem:" + latitude);
+            throw new IllegalArgumentException("Latitude out of range: " + latitude);
         } else if (longitude < -180 || longitude >= 180) {
 
-            throw new IllegalArgumentException("boylam aralık dışında. boylam:" + longitude);
+            throw new IllegalArgumentException("Longitude out of range: " + longitude);
         }
 
     }

@@ -9,14 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record CreateSensorRequest(
-        @NotBlank(message = "Sensor adı boş olamaz") @Size(max = 200, message = "Sensor adı maksimum 200 karakter olabilir") String name,
+        @NotBlank(message = "Sensor name must not be blank") @Size(max = 200, message = "Sensor name must be at most 200 characters") String name,
 
-        @NotNull(message = "Sensor Tipi boş olamaz") SensorType type,
+        @NotNull(message = "Sensor type is required") SensorType type,
 
-        @NotNull(message = "Enlem boş olamaz") @DecimalMin(value = "-90", message = "enlem minimum değeri -90 olabilir") @DecimalMax(value = "90", message = "enlem maksimum değeri 90 olabilir") Double latitude,
+        @NotNull(message = "Latitude is required") @DecimalMin(value = "-90", message = "Latitude must be at least -90") @DecimalMax(value = "90", message = "Latitude must be at most 90") Double latitude,
 
-        // boylamda degeri [-180,180) aralığında olması gerekiyor bu yüzden 180 açık
-        // aralık.
-        @NotNull(message = "Boylam boş olamaz") @DecimalMin(value = "-180", message = "boylam minimum değeri -180 olabilir") @DecimalMax(value = "180", inclusive = false, message = "boylam minimum değeri 180 olabilir") Double longitude) {
+        // Longitude must be in [-180, 180): -180 and 180 are the same meridian, so 180 is excluded.
+        @NotNull(message = "Longitude is required") @DecimalMin(value = "-180", message = "Longitude must be at least -180") @DecimalMax(value = "180", inclusive = false, message = "Longitude must be less than 180") Double longitude) {
 
 }

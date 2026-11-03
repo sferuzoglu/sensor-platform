@@ -25,15 +25,15 @@ public class SensorConcurrencyTest {
     SensorRepository sensorRepository;
 
     @BeforeEach
-    void temizle() {
+    void cleanUp() {
         sensorRepository.deleteAllInBatch();
     }
 
     @Test
-    void eski_surumle_kayit_istisna_firlatir() throws Exception {
+    void saving_stale_version_throws() throws Exception {
 
         Sensor save = sensorRepository
-                .save(new Sensor("istasyon-1", SensorType.HUMIDITY, new GeoLocation(38, 32), true));
+                .save(new Sensor("station-1", SensorType.HUMIDITY, new GeoLocation(38, 32), true));
 
         Optional<Sensor> first = sensorRepository.findById(save.getId());
 

@@ -4,9 +4,12 @@ import { Alert, Container, CssBaseline, Stack, Typography } from '@mui/material'
 
 import SensorCard from './features/sensors/components/SensorCard';
 
+import SensorForm from './features/sensors/components/SensorForm';
+
 import type { Sensor } from './features/sensors/types';
 
 import { deactivateSensor, fetchSensors } from './features/sensors/sensorApi';
+
 
 
 function App() {
@@ -56,8 +59,9 @@ function App() {
   return (
     <CssBaseline>
       <Container maxWidth="md">
-        <Typography variant="h4" component="h1">Sensör Paneli</Typography>
-        <Typography variant="subtitle1">Aktif: {activeCount} / {sensors.length}</Typography>
+        <Typography variant="h4" component="h1">Sensor Dashboard</Typography>
+        <Typography variant="subtitle1">Active: {activeCount} / {sensors.length}</Typography>
+        <SensorForm />
         {error && <Alert severity="error">{error}</Alert>}
         <Stack spacing={2}>
           {sensors.map(s => (

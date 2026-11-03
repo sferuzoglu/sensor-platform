@@ -26,16 +26,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public ProblemDetail duplicateSensorNameExceptionHandler(DuplicateSensorNameException e) {
 
-        log.info("Mükerrer sensör adı: {}", e.getMessage());
+        log.info("Duplicate sensor name: {}", e.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
     }
 
     @ExceptionHandler
     public ProblemDetail dataIntegrityViolationExceptionHandler(DataIntegrityViolationException e) {
 
-        log.warn("Veri bütünlüğü ihlali", e);
+        log.warn("Data integrity violation", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
-                "Bu isimde bir sensör zaten var.");
+                "A sensor with this name already exists.");
     }
 
     @ExceptionHandler
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
 
         log.info("{}", e.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
-                "Kayıt başka biri tarafından değiştirildi. Lütfen yenileyip tekrar deneyin.");
+                "The record was modified by someone else. Please refresh and try again.");
     }
 
     @ExceptionHandler
@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
         fieldErrors.forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                "Hatalı parametre");
+                "Invalid request parameters");
 
         problemDetail.setProperty("errors", errors);
 

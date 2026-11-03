@@ -12,16 +12,16 @@ function SensorCard({ name, type, active, onDeactivate }: SensorCardProps) {
         <Card variant="outlined">
             <CardContent>
                 <Typography variant="h6">{name}</Typography>
-                <Typography variant="body2" color="text.secondary">Tip: {type}</Typography>
+                <Typography variant="body2" color="text.secondary">Type: {type}</Typography>
                 <Chip
                     sx={{ mt: 1 }}
-                    label={`Durum: ${active ? "Aktif" : "Pasif"}`}
+                    label={`Status: ${active ? "Active" : "Inactive"}`}
                     color={active ? "success" : "default"}
                     size="small"
                 />
             </CardContent>
             <CardActions>
-                <Button size="small" onClick={onDeactivate} disabled={!active}>Pasifleştir</Button>
+                <Button size="small" onClick={onDeactivate} disabled={!active}>Deactivate</Button>
             </CardActions>
         </Card>
     );
