@@ -7,9 +7,3 @@ export type Sensor = {
   active: boolean;
   createdAt: string;
 };
-
-export type ProblemDetail = {
-  title: string;
-  status: number;
-  detail: string;
-};

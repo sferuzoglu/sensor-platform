@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import SensorCard from './components/SensorCard';
-import type { ProblemDetail, Sensor } from './types';
+import SensorCard from './features/sensors/components/SensorCard';
+
+import type { Sensor } from './features/sensors/types';
+
+import { deactivateSensor, fetchSensors } from './features/sensors/sensorApi';
+
 
 function App() {
 
@@ -13,30 +17,36 @@ function App() {
 
     async function loadSensors() {
 
-      const response = await fetch("/api/sensors");
-
-      const data: Sensor[] = await response.json();
-
-      setSensors(data);
+      try {
+        
+        setSensors(await fetchSensors());
+      } catch (e) {
+        
+        setError((e as Error).message);
+      }
     }
     loadSensors();
   }, []);
 
   async function deactivate(id: number) {
 
-    const response = await fetch(`/api/sensors/${id}/deactivate`, { method: "POST" });
+    try {
 
-    if (!response.ok) {
-      const problem: ProblemDetail = await response.json();
-      setError(problem.detail);
-      return;
+      const sensor: Sensor = await deactivateSensor(id);
+      setSensors(onceki => onceki.map(e => e.id === id ? sensor : e));
+      setError(null);
+    
+    } catch (e) {
+      
+      setError((e as Error).message);
+
+      try {
+        
+        setSensors(await fetchSensors());
+      } catch (e2) {
+        setError((e2 as Error).message);
+      }
     }
-
-    const updated: Sensor = await response.json();
-
-    setSensors(onceki => onceki.map(e => e.id === id ? updated : e));
-
-    setError(null)
   }
 
   const activeCount = sensors.filter(s => s.active).length;
