@@ -1,20 +1,31 @@
 import { useState } from "react";
-import { Box, Button, MenuItem, Stack, TextField } from "@mui/material";
-import type { CreateSensorRequest } from "../types";
+import { Alert, Box, Button, MenuItem, Stack, TextField } from "@mui/material";
+import type { CreateSensorRequest, Sensor } from "../types";
+import { createSensor } from "../sensorApi";
+import { ApiError } from "../../../shared/ApiError";
 
-function SensorForm() {
+type SensorFormProps = {
 
+    onCreated: (sensor: Sensor) => void;
+};
+
+function SensorForm({ onCreated }: SensorFormProps) {
+
+    const [submitting, setSubmitting] = useState(false);
     const [name, setName] = useState("");
     const [type, setType] = useState("");
     const [latitude, setLatitude] = useState("");
     const [longitude, setLongitude] = useState("");
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const [formError, setFormError] = useState<string | null>(null);
 
-    function handleSubmit(e: React.SyntheticEvent) {
+    async function handleSubmit(e: React.SyntheticEvent) {
 
         e.preventDefault();
 
-        if(validate()) {
+        setFormError(null);
+
+        if (hasErrors()) {
 
             return;
         }
@@ -29,10 +40,28 @@ function SensorForm() {
             latitude: lat,
             longitude: lon
         };
-        console.log(request);
+
+        try {
+
+            setSubmitting(true);
+            const sensor: Sensor = await createSensor(request);
+            onCreated(sensor);
+            clearForm();
+
+        } catch (e) {
+
+            if (e instanceof ApiError && e.fieldErrors) {
+                setFieldErrors(e.fieldErrors);   // 400: backend'in alan hataları
+            } else {
+                setFormError((e as Error).message);   // 409 ya da diğer hatalar
+            }
+        } finally {
+
+            setSubmitting(false);
+        }
     }
 
-    function validate(): boolean {
+    function hasErrors(): boolean {
 
         const errors: Record<string, string> = {};
 
@@ -61,9 +90,20 @@ function SensorForm() {
         return Object.keys(errors).length > 0;
     }
 
+    function clearForm() {
+
+        setName("");
+        setType("");
+        setLatitude("");
+        setLongitude("");
+    }
+
     return (
         <Box component="form" onSubmit={handleSubmit}>
             <Stack spacing={2}>
+
+                {formError && <Alert severity="error">{formError}</Alert>}
+
                 <TextField
                     label="Name"
                     value={name}
@@ -104,7 +144,7 @@ function SensorForm() {
                     error={!!fieldErrors.longitude}
                     helperText={fieldErrors.longitude}
                 />
-                <Button type="submit" variant="contained">Add</Button>
+                <Button type="submit" variant="contained" disabled={submitting}>Add</Button>
             </Stack>
         </Box>
     );

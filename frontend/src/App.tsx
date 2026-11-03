@@ -10,8 +10,6 @@ import type { Sensor } from './features/sensors/types';
 
 import { deactivateSensor, fetchSensors } from './features/sensors/sensorApi';
 
-
-
 function App() {
 
   const [sensors, setSensors] = useState<Sensor[]>([]);
@@ -61,7 +59,7 @@ function App() {
       <Container maxWidth="md">
         <Typography variant="h4" component="h1">Sensor Dashboard</Typography>
         <Typography variant="subtitle1">Active: {activeCount} / {sensors.length}</Typography>
-        <SensorForm />
+        <SensorForm onCreated={s => setSensors(prev => [...prev, s])} />
         {error && <Alert severity="error">{error}</Alert>}
         <Stack spacing={2}>
           {sensors.map(s => (
