@@ -40,6 +40,13 @@ export async function deactivateSensor(id: number): Promise<Sensor> {
     return updated;
 }
 
+export async function removeSensor(id: number): Promise<void> {
+
+    const response = await fetch(`/api/sensors/${id}`, { method: "DELETE" });
+
+    await responseChecker(response);
+}
+
 async function responseChecker(response: Response) {
 
     if (!response.ok) {

@@ -5,9 +5,10 @@ type SensorCardProps = {
     type: string;
     active: boolean;
     onDeactivate: () => void;
+    onRemove: () => void;
 };
 
-function SensorCard({ name, type, active, onDeactivate }: SensorCardProps) {
+function SensorCard({ name, type, active, onDeactivate, onRemove}: SensorCardProps) {
     return (
         <Card variant="outlined">
             <CardContent>
@@ -22,6 +23,7 @@ function SensorCard({ name, type, active, onDeactivate }: SensorCardProps) {
             </CardContent>
             <CardActions>
                 <Button size="small" onClick={onDeactivate} disabled={!active}>Deactivate</Button>
+                <Button size="small" onClick={onRemove}>Remove</Button>
             </CardActions>
         </Card>
     );

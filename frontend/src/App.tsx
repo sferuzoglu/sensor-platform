@@ -8,7 +8,7 @@ import SensorForm from './features/sensors/components/SensorForm';
 
 import type { Sensor } from './features/sensors/types';
 
-import { deactivateSensor, fetchSensors } from './features/sensors/sensorApi';
+import { deactivateSensor, fetchSensors, removeSensor } from './features/sensors/sensorApi';
 
 function App() {
 
@@ -31,12 +31,37 @@ function App() {
     loadSensors();
   }, []);
 
+  async function remove(id: number) {
+
+    try {
+
+      await removeSensor(id);
+
+      setSensors(prev => prev.filter(e => e.id !== id));
+
+      setError(null);
+
+    } catch (e) {
+
+      setError((e as Error).message);
+
+      try {
+
+        setSensors(await fetchSensors());
+      } catch (e2) {
+        setError((e2 as Error).message);
+      }
+      
+    }
+
+  }
+
   async function deactivate(id: number) {
 
     try {
 
       const sensor: Sensor = await deactivateSensor(id);
-      setSensors(onceki => onceki.map(e => e.id === id ? sensor : e));
+      setSensors(prev => prev.map(e => e.id === id ? sensor : e));
       setError(null);
 
     } catch (e) {
@@ -63,7 +88,7 @@ function App() {
         {error && <Alert severity="error">{error}</Alert>}
         <Stack spacing={2}>
           {sensors.map(s => (
-            <SensorCard key={s.id} name={s.name} type={s.type} active={s.active} onDeactivate={() => deactivate(s.id)} />
+            <SensorCard key={s.id} name={s.name} type={s.type} active={s.active} onDeactivate={() => deactivate(s.id)} onRemove={() => remove(s.id)}/>
           ))}
         </Stack>
       </Container>

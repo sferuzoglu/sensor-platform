@@ -39,6 +39,16 @@ public class SensorService {
         return sensor;
     }
 
+    @Transactional
+    public void removeById(Long id) {
+
+        Optional<Sensor> sensorOpt = repository.findById(id);
+
+        Sensor sensor = sensorOpt.orElseThrow(() -> new SensorNotFoundException("Sensor not found: id=" + id));
+
+        repository.delete(sensor);
+    }
+
     @Transactional(readOnly = true)
     public List<Sensor> findAll() {
 

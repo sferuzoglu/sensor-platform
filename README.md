@@ -1,7 +1,7 @@
 # Sensör Platformu
 
 Spring Boot ve React öğrenmek amacıyla sıfırdan geliştirdiğim bir sensör yönetim uygulaması.
-Sensörler arayüzden eklenir, listelenir ve pasifleştirilir. Proje adım adım genişlemeye devam ediyor (bkz. [Yol haritası](#yol-haritası)).
+Sensörler arayüzden eklenir, listelenir, pasifleştirilir ve silinir. Proje adım adım genişlemeye devam ediyor (bkz. [Yol haritası](#yol-haritası)).
 
 ## Teknolojiler
 
@@ -55,6 +55,7 @@ mvn test
 | `GET` | `/api/sensors` | Tüm sensörleri listeler | |
 | `GET` | `/api/sensors/{id}` | Tek sensörü getirir | `404` |
 | `POST` | `/api/sensors/{id}/deactivate` | Sensörü pasifleştirir | `404`, `409` zaten pasif veya eşzamanlı değişiklik |
+| `DELETE` | `/api/sensors/{id}` | Sensörü siler, `204` döner (gövdesiz) | `404` |
 
 Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarında `errors` alanı, hangi alanın neden reddedildiğini listeler.
 

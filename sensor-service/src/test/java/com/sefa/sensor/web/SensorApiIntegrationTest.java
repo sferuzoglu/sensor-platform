@@ -1,5 +1,6 @@
 package com.sefa.sensor.web;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -82,6 +83,19 @@ public class SensorApiIntegrationTest {
     void unknown_id_returns_404() throws Exception {
 
         mockMvc.perform(get("/api/sensors/99999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void delete_returns_204_and_sensor_is_gone() throws Exception {
+
+        Sensor sensor = sensorRepository
+                .save(new Sensor("station-1", SensorType.HUMIDITY, new GeoLocation(38, 33), true));
+
+        mockMvc.perform(delete("/api/sensors/" + sensor.getId()))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/sensors/" + sensor.getId()))
                 .andExpect(status().isNotFound());
     }
 
