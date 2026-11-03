@@ -1,5 +1,6 @@
-import type { Sensor } from './types';
+import type { Sensor, CreateSensorRequest } from './types';
 import type { ProblemDetail } from '../../shared/types';
+import { ApiError } from '../../shared/ApiError';
 
 export async function fetchSensors(): Promise<Sensor[]> {
 
@@ -10,6 +11,22 @@ export async function fetchSensors(): Promise<Sensor[]> {
     const data: Sensor[] = await response.json();
 
     return data;
+}
+
+export async function createSensor(request: CreateSensorRequest): Promise<Sensor> {
+
+    const response = await fetch("/api/sensors", {
+
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+    });
+
+    await responseChecker(response);
+
+    const sensor: Sensor = await response.json();
+
+    return sensor;
 }
 
 export async function deactivateSensor(id: number): Promise<Sensor> {
@@ -33,10 +50,10 @@ async function responseChecker(response: Response) {
             
             const problem: ProblemDetail = await response.json();
     
-            throw new Error(problem.detail ?? `Unexpected error (HTTP ${response.status})`);
+            throw new ApiError(problem.detail ?? `Unexpected error (HTTP ${response.status})`, response.status, problem.errors);
         } else {
 
-            throw new Error(`The server is unreachable (HTTP ${response.status})`);
+            throw new ApiError(`The server is unreachable (HTTP ${response.status})`, response.status);
         }
 
     }

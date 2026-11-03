@@ -7,3 +7,11 @@ export type Sensor = {
   active: boolean;
   createdAt: string;
 };
+
+export type CreateSensorRequest = {
+
+    name: string;
+    type: string;
+    latitude: number;
+    longitude: number;
+}
