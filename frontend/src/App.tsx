@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import { Alert, Container, CssBaseline, Stack, Typography } from '@mui/material';
+
 import SensorCard from './features/sensors/components/SensorCard';
 
 import type { Sensor } from './features/sensors/types';
@@ -18,10 +20,10 @@ function App() {
     async function loadSensors() {
 
       try {
-        
+
         setSensors(await fetchSensors());
       } catch (e) {
-        
+
         setError((e as Error).message);
       }
     }
@@ -35,13 +37,13 @@ function App() {
       const sensor: Sensor = await deactivateSensor(id);
       setSensors(onceki => onceki.map(e => e.id === id ? sensor : e));
       setError(null);
-    
+
     } catch (e) {
-      
+
       setError((e as Error).message);
 
       try {
-        
+
         setSensors(await fetchSensors());
       } catch (e2) {
         setError((e2 as Error).message);
@@ -52,15 +54,18 @@ function App() {
   const activeCount = sensors.filter(s => s.active).length;
 
   return (
-    <div>
-
-      <h1>Sensör Paneli</h1>
-      <h2>Aktif: {activeCount}/ {sensors.length}</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {sensors.map(s => (
-        <SensorCard key={s.id} name={s.name} type={s.type} active={s.active} onDeactivate={() => deactivate(s.id)} />
-      ))}
-    </div>
+    <CssBaseline>
+      <Container maxWidth="md">
+        <Typography variant="h4" component="h1">Sensör Paneli</Typography>
+        <Typography variant="subtitle1">Aktif: {activeCount} / {sensors.length}</Typography>
+        {error && <Alert severity="error">{error}</Alert>}
+        <Stack spacing={2}>
+          {sensors.map(s => (
+            <SensorCard key={s.id} name={s.name} type={s.type} active={s.active} onDeactivate={() => deactivate(s.id)} />
+          ))}
+        </Stack>
+      </Container>
+    </CssBaseline>
   );
 }
 

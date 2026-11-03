@@ -3,7 +3,7 @@ POST http://localhost:8080/api/sensors
 Content-Type: application/json
 
 {
-  "name": "istasyon-5",
+  "name": "istasyon-13",
   "type": "HUMIDITY",
   "latitude": 41.01,
   "longitude": 28.97
