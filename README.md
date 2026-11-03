@@ -80,4 +80,6 @@ Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarınd
 - [ ] Sensörlerden UDP ile veri alımı (Netty), son durum için Redis
 - [ ] Kafka ile olay yayını ve ayrı bir alarm servisi
 - [ ] WebSocket ile canlı izleme ekranı
-- [ ] CI (GitHub Actions)
+- [ ] Elasticsearch ile sensör olaylarında arama
+- [ ] CI (GitHub Actions), SonarQube ile kod kalitesi analizi
+- [ ] Kubernetes manifestleri
