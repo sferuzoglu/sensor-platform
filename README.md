@@ -1,7 +1,7 @@
 # Sensör Platformu
 
 Spring Boot ve React öğrenmek amacıyla sıfırdan geliştirdiğim bir sensör yönetim uygulaması.
-Sensörler kaydedilir, listelenir ve pasifleştirilir. Proje adım adım genişlemeye devam ediyor (bkz. [Yol haritası](#yol-haritası)).
+Sensörler arayüzden eklenir, listelenir ve pasifleştirilir. Proje adım adım genişlemeye devam ediyor (bkz. [Yol haritası](#yol-haritası)).
 
 ## Teknolojiler
 
@@ -67,6 +67,7 @@ Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarınd
 - **Entity yerine DTO.** API sözleşmesi veritabanı yapısından ayrıdır; istemci sadece izin verilen alanları gönderebilir.
 - **İç hata ayrıntıları sızdırılmaz.** Veritabanı ve Hibernate istisnalarının mesajları istemciye gönderilmez; ayrıntı log'a yazılır.
 - **Gerçek veritabanıyla test.** Entegrasyon testleri Testcontainers ile her çalıştırmada boş bir PostgreSQL üzerinde çalışır; Flyway migration'ları da bu sırada doğrulanmış olur.
+- **Doğrulama istemcide ve sunucuda.** Form, hatalı girdiyi istek atmadan yakalar; asıl kural sunucudadır. Sunucunun döndüğü alan hataları formda ilgili alanın altında, diğer hatalar (ör. `409`) formun üstünde gösterilir. İstek sürerken gönder butonu kilitlenir.
 - **CORS yerine proxy.** Geliştirmede arayüz, istekleri Vite proxy üzerinden backend'e iletir; arayüz kodunda backend adresi yer almaz.
 
 ## Yol haritası
@@ -74,7 +75,7 @@ Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarınd
 - [x] Sensör CRUD, doğrulama, hata yönetimi
 - [x] Birim ve entegrasyon testleri
 - [x] React arayüzü: listeleme ve pasifleştirme
-- [ ] Sensör ekleme formu
+- [x] Sensör ekleme formu
 - [ ] Servisin Docker imajı
 - [ ] Sensörlerden UDP ile veri alımı (Netty), son durum için Redis
 - [ ] Kafka ile olay yayını ve ayrı bir alarm servisi
