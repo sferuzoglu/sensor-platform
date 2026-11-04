@@ -11,12 +11,12 @@ Sensörler arayüzden eklenir, listelenir, pasifleştirilir ve silinir. Proje ad
 | Veritabanı | PostgreSQL 16, Flyway |
 | Test | JUnit 5, Mockito, Testcontainers, MockMvc |
 | Frontend | React 19, TypeScript, Vite, MUI |
-| Altyapı | Docker Compose |
+| Altyapı | Docker (multi-stage build), Docker Compose |
 
 ## Proje yapısı
 
 ```
-├─ docker-compose.yml   PostgreSQL
+├─ docker-compose.yml   PostgreSQL + sensor-service
 ├─ sensor.http          Elle API testleri (VS Code REST Client)
 ├─ sensor-service/      Spring Boot REST API
 └─ frontend/            React + TypeScript arayüz
@@ -24,20 +24,29 @@ Sensörler arayüzden eklenir, listelenir, pasifleştirilir ve silinir. Proje ad
 
 ## Çalıştırma
 
-Gereksinimler: JDK 21, Maven, Node.js, Docker.
+**Seçenek A: Backend Docker'da** (gereksinimler: Docker, Node.js)
 
 ```bash
-# 1) Veritabanı
-docker compose up -d
+# 1) Veritabanı + backend  →  http://localhost:8080
+docker compose up -d --build
+
+# 2) Frontend →  http://localhost:5173
+cd frontend
+npm install
+npm run dev
+```
+
+**Seçenek B: Backend yerelde** (geliştirme için; gereksinimler: JDK 21, Maven, Node.js, Docker)
+
+```bash
+# 1) Sadece veritabanı
+docker compose up -d postgres
 
 # 2) Backend  →  http://localhost:8080
 cd sensor-service
 mvn spring-boot:run
 
-# 3) Frontend →  http://localhost:5173
-cd frontend
-npm install
-npm run dev
+# 3) Frontend: Seçenek A'daki gibi
 ```
 
 Testler (Docker açık olmalı; testler kendi PostgreSQL konteynerini başlatır):
@@ -69,6 +78,7 @@ Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarınd
 - **İç hata ayrıntıları sızdırılmaz.** Veritabanı ve Hibernate istisnalarının mesajları istemciye gönderilmez; ayrıntı log'a yazılır.
 - **Gerçek veritabanıyla test.** Entegrasyon testleri Testcontainers ile her çalıştırmada boş bir PostgreSQL üzerinde çalışır; Flyway migration'ları da bu sırada doğrulanmış olur.
 - **Doğrulama istemcide ve sunucuda.** Form, hatalı girdiyi istek atmadan yakalar; asıl kural sunucudadır. Sunucunun döndüğü alan hataları formda ilgili alanın altında, diğer hatalar (ör. `409`) formun üstünde gösterilir. İstek sürerken gönder butonu kilitlenir.
+- **Yapılandırma ortam değişkeniyle.** Aynı Docker imajı her ortamda çalışır; veritabanı adresi imaja gömülmez, `SPRING_DATASOURCE_URL` ile dışarıdan verilir. Backend, PostgreSQL'in healthcheck'i geçmesini bekleyerek başlar.
 - **CORS yerine proxy.** Geliştirmede arayüz, istekleri Vite proxy üzerinden backend'e iletir; arayüz kodunda backend adresi yer almaz.
 
 ## Yol haritası
@@ -77,7 +87,7 @@ Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarınd
 - [x] Birim ve entegrasyon testleri
 - [x] React arayüzü: listeleme ve pasifleştirme
 - [x] Sensör ekleme formu
-- [ ] Servisin Docker imajı
+- [x] Servisin Docker imajı
 - [ ] Sensörlerden UDP ile veri alımı (Netty), son durum için Redis
 - [ ] Kafka ile olay yayını ve ayrı bir alarm servisi
 - [ ] WebSocket ile canlı izleme ekranı
