@@ -17,9 +17,12 @@ public class MeasurementHandler extends SimpleChannelInboundHandler<DatagramPack
 
     private final PacketCodec codec;
 
-    public MeasurementHandler(PacketCodec codec) {
+    private final LatestMeasurementStore store;
+
+    public MeasurementHandler(PacketCodec codec, LatestMeasurementStore store) {
 
         this.codec = codec;
+        this.store = store;
     }
 
     @Override
@@ -30,7 +33,16 @@ public class MeasurementHandler extends SimpleChannelInboundHandler<DatagramPack
         try {
 
             SensorMessage message = codec.decode(buffer);
+
             log.debug("Received {}", message);
+
+            if (message instanceof Measurement measurement) {
+
+                if (!store.save(measurement)) {
+
+                    log.debug("Stale packet dropped: {}", measurement);
+                }
+            }
         } catch (InvalidPacketException e) {
 
             log.warn("Invalid packet from {}: {}", packet.sender(), e.getMessage());
