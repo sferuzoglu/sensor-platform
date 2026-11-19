@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Instant;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -95,10 +96,25 @@ public class LatestMeasurementStoreTest {
         assertTrue(ttl > 0 && ttl <= 10, "Unexpected TTL: " + ttl);
     }
 
+    @Test
+    void latest_is_read_back() {
+
+        assertTrue(store.save(measurement(1)));
+
+        assertEquals(measurement(1), store.findLatest(SENSOR_ID).orElseThrow());
+    }
+
+    @Test
+    void missing_key_returns_empty() {
+
+        Optional<Measurement> opt = store.findLatest(SENSOR_ID);
+
+        assertTrue(opt.isEmpty());
+    }
+
     private Measurement measurement(long sequence) {
 
         return new Measurement(SENSOR_ID, sequence, TIMESTAMP, VALUE);
-
     }
 
 }
