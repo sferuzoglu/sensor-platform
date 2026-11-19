@@ -7,7 +7,7 @@ Sensörler arayüzden eklenir, listelenir, pasifleştirilir ve silinir. Proje ad
 
 | Katman | Kullanılanlar |
 |---|---|
-| Backend | Java 21, Spring Boot 4, Spring Data JPA (Hibernate), Bean Validation, Spring Boot Actuator |
+| Backend | Java 21, Spring Boot 4, Spring Data JPA (Hibernate), Bean Validation, Spring Boot Actuator, Netty (UDP) |
 | Veritabanı | PostgreSQL 16, Flyway |
 | Test | JUnit 5, Mockito, Testcontainers, MockMvc |
 | Frontend | React 19, TypeScript, Vite, MUI |
@@ -17,8 +17,9 @@ Sensörler arayüzden eklenir, listelenir, pasifleştirilir ve silinir. Proje ad
 
 ```
 ├─ docker-compose.yml   PostgreSQL + sensor-service
+├─ docs/protocol.md     Sensör UDP protokolü (ICD)
 ├─ sensor.http          Elle API testleri (VS Code REST Client)
-├─ sensor-service/      Spring Boot REST API
+├─ sensor-service/      Spring Boot REST API + UDP veri alımı
 └─ frontend/            React + TypeScript arayüz
 ```
 
@@ -68,6 +69,18 @@ mvn test
 
 Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarında `errors` alanı, hangi alanın neden reddedildiğini listeler.
 
+## Sensör verisi (UDP)
+
+Sensörler ölçümlerini **UDP 9876** portuna 31 baytlık ikili paketler olarak gönderir. Paket formatı, doğrulama kuralları ve örnek paket [docs/protocol.md](docs/protocol.md) dosyasındadır.
+
+Elle bir paket göndermek için (PowerShell):
+
+```powershell
+$udp = New-Object System.Net.Sockets.UdpClient
+$p = [byte[]](0x53,0x46,0x01,0x00,0x01,0x00,0x10,0x00,0x00,0x00,0x2A,0x00,0x00,0x00,0x07,0x00,0x00,0x01,0x9B,0x76,0xDA,0xA8,0x00,0x40,0x35,0x80,0x00,0x00,0x00,0x00,0x00)
+$udp.Send($p, $p.Length, "localhost", 9876)
+```
+
 ## Öne çıkan tasarım kararları
 
 - **Mükerrer isim iki katmanda kontrol ediliyor.** Servisteki kontrol kullanıcıya anlaşılır bir hata verir; asıl garanti veritabanındaki `UNIQUE` kısıtıdır. Eşzamanlı iki istek servis kontrolünü birlikte geçerse, veritabanı hatası da aynı `409` cevabına çevrilir.
@@ -79,6 +92,7 @@ Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarınd
 - **Gerçek veritabanıyla test.** Entegrasyon testleri Testcontainers ile her çalıştırmada boş bir PostgreSQL üzerinde çalışır; Flyway migration'ları da bu sırada doğrulanmış olur.
 - **Doğrulama istemcide ve sunucuda.** Form, hatalı girdiyi istek atmadan yakalar; asıl kural sunucudadır. Sunucunun döndüğü alan hataları formda ilgili alanın altında, diğer hatalar (ör. `409`) formun üstünde gösterilir. İstek sürerken gönder butonu kilitlenir.
 - **Yapılandırma ortam değişkeniyle.** Aynı Docker imajı her ortamda çalışır; veritabanı adresi imaja gömülmez, `SPRING_DATASOURCE_URL` ile dışarıdan verilir. Backend, PostgreSQL'in healthcheck'i geçmesini bekleyerek başlar. Konteyner root olmayan bir kullanıcıyla çalışır; uygulama kendi jar dosyasını değiştiremez.
+- **Protokol çözümü ağ katmanından ayrı.** `PacketCodec` başlığı doğrular ve mesaj tipine göre ilgili çözücüyü seçer; Netty'ye bağımlı değildir ve ağ olmadan birim testiyle doğrulanır. Yeni bir mesaj tipi, yalnızca yeni bir `PayloadDecoder` bileşeni yazılarak eklenir. Bozuk paketler loglanıp atılır, sunucu çalışmaya devam eder.
 - **CORS yerine proxy.** Geliştirmede arayüz, istekleri Vite proxy üzerinden backend'e iletir; arayüz kodunda backend adresi yer almaz.
 
 ## Yol haritası

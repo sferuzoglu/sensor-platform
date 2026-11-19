@@ -18,6 +18,7 @@ services:
     build: ./sensor-service
     ports:
       - "8080:8080"
+      - "9876:9876/udp"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sensordb
     depends_on: 
