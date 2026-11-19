@@ -17,7 +17,7 @@ import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
 
-@SpringBootTest
+@SpringBootTest(properties = "sensor.ingest.udp-port=0")
 @Import(TestcontainersConfiguration.class)
 public class SensorConcurrencyTest {
 

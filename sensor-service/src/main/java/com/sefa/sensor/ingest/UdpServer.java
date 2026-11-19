@@ -1,5 +1,7 @@
 package com.sefa.sensor.ingest;
 
+import java.net.InetSocketAddress;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +49,9 @@ public class UdpServer implements SmartLifecycle {
 
             running = true;
 
-            log.info("UDP server listening on port {}", port);
+            int realPort = ((InetSocketAddress) channel.localAddress()).getPort();
+
+            log.info("UDP server listening on port {}", realPort);
 
         } catch (InterruptedException e) {
 
