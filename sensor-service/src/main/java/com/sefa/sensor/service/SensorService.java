@@ -12,14 +12,18 @@ import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
 import com.sefa.sensor.exceptions.DuplicateSensorNameException;
 import com.sefa.sensor.exceptions.SensorNotFoundException;
+import com.sefa.sensor.ingest.LatestMeasurementStore;
+import com.sefa.sensor.ingest.Measurement;
 
 @Service
 public class SensorService {
 
     private final SensorRepository repository;
+    private final LatestMeasurementStore store;
 
-    public SensorService(SensorRepository repository) {
+    public SensorService(SensorRepository repository, LatestMeasurementStore store) {
         this.repository = repository;
+        this.store = store;
     }
 
     @Transactional
@@ -74,5 +78,13 @@ public class SensorService {
 
         return sensor;
 
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Measurement> findLatest(Long id) {
+
+        findById(id);
+
+        return store.findLatest(id);
     }
 }

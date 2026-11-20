@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
 
         log.info("{}", e.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND,
-                "Sensor Bulunamadi");
+                "Sensor not found");
     }
 
     @ExceptionHandler

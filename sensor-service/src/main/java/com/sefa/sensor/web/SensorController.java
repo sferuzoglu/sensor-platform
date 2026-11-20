@@ -67,4 +67,13 @@ public class SensorController {
         service.removeById(id);
     }
 
+    @GetMapping("/{id}/latest")
+    public ResponseEntity<LatestMeasurementResponse> latest(@PathVariable Long id) {
+
+        return service.findLatest(id)
+                .map(LatestMeasurementResponse::from)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
 }

@@ -21,15 +21,18 @@ import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
 import com.sefa.sensor.exceptions.DuplicateSensorNameException;
 import com.sefa.sensor.exceptions.SensorNotFoundException;
+import com.sefa.sensor.ingest.LatestMeasurementStore;
 
 @ExtendWith(MockitoExtension.class)
 public class SensorServiceTest {
 
     @Mock
-    SensorRepository repository; // mock dependency
+    SensorRepository repository;
+    @Mock
+    LatestMeasurementStore store;
 
     @InjectMocks
-    SensorService service; // injects the mock via the constructor
+    SensorService service;
 
     @Test
     void creates_sensor_when_name_is_free() {

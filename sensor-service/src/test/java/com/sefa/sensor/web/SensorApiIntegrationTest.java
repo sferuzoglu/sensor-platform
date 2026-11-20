@@ -1,5 +1,6 @@
 package com.sefa.sensor.web;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -7,12 +8,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -21,6 +26,8 @@ import com.sefa.sensor.domain.GeoLocation;
 import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
+import com.sefa.sensor.ingest.LatestMeasurementStore;
+import com.sefa.sensor.ingest.Measurement;
 
 @SpringBootTest(properties = "sensor.ingest.udp-port=0")
 @AutoConfigureMockMvc
@@ -33,9 +40,21 @@ public class SensorApiIntegrationTest {
     @Autowired
     SensorRepository sensorRepository;
 
+    @Autowired
+    LatestMeasurementStore store;
+
+    @Autowired
+    StringRedisTemplate redis;
+
     @BeforeEach
     void cleanUp() {
+
         sensorRepository.deleteAllInBatch();
+
+        redis.execute((RedisCallback<Void>) connection -> {
+            connection.serverCommands().flushDb();
+            return null;
+        });
     }
 
     @Test
@@ -96,6 +115,40 @@ public class SensorApiIntegrationTest {
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get("/api/sensors/" + sensor.getId()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void latest_returns_200_with_measurement() throws Exception {
+
+        Sensor sensor = sensorRepository
+                .save(new Sensor("station-1", SensorType.HUMIDITY, new GeoLocation(38, 33), true));
+
+        Measurement measurement = new Measurement(sensor.getId(), 1, Instant.parse("2026-01-01T00:00:00Z"), 21.5);
+
+        assertTrue(store.save(measurement));
+
+        mockMvc.perform(get("/api/sensors/" + sensor.getId() + "/latest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sequence").value(1))
+                .andExpect(jsonPath("$.value").value(21.5))
+                .andExpect(jsonPath("$.timestamp").value("2026-01-01T00:00:00Z"));
+    }
+
+    @Test
+    void silent_sensor_returns_204() throws Exception {
+
+        Sensor sensor = sensorRepository
+                .save(new Sensor("station-1", SensorType.HUMIDITY, new GeoLocation(38, 33), true));
+
+        mockMvc.perform(get("/api/sensors/" + sensor.getId() + "/latest"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void unknown_sensor_latest_returns_404() throws Exception {
+
+        mockMvc.perform(get("/api/sensors/" + 9999 + "/latest"))
                 .andExpect(status().isNotFound());
     }
 
