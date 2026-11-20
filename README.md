@@ -1,14 +1,14 @@
 # Sensör Platformu
 
 Spring Boot ve React öğrenmek amacıyla sıfırdan geliştirdiğim bir sensör yönetim uygulaması.
-Sensörler arayüzden eklenir, listelenir, pasifleştirilir ve silinir. Proje adım adım genişlemeye devam ediyor (bkz. [Yol haritası](#yol-haritası)).
+Sensörler arayüzden eklenir, listelenir, pasifleştirilir ve silinir. Sensörlerin UDP ile gönderdiği ölçümler alınır; her sensörün son değeri ve çevrimiçi durumu arayüzde gösterilir. Proje adım adım genişlemeye devam ediyor (bkz. [Yol haritası](#yol-haritası)).
 
 ## Teknolojiler
 
 | Katman | Kullanılanlar |
 |---|---|
 | Backend | Java 21, Spring Boot 4, Spring Data JPA (Hibernate), Bean Validation, Spring Boot Actuator, Netty (UDP) |
-| Veritabanı | PostgreSQL 16, Flyway |
+| Veritabanı | PostgreSQL 16, Flyway, Redis 7 (son durum) |
 | Test | JUnit 5, Mockito, Testcontainers, MockMvc |
 | Frontend | React 19, TypeScript, Vite, MUI |
 | Altyapı | Docker (multi-stage build), Docker Compose |
@@ -16,7 +16,8 @@ Sensörler arayüzden eklenir, listelenir, pasifleştirilir ve silinir. Proje ad
 ## Proje yapısı
 
 ```
-├─ docker-compose.yml   PostgreSQL + sensor-service
+├─ docker-compose.yml   PostgreSQL + Redis + sensor-service
+├─ simulator/           UDP sensör simülatörü (tek dosya, bağımlılıksız)
 ├─ docs/protocol.md     Sensör UDP protokolü (ICD)
 ├─ sensor.http          Elle API testleri (VS Code REST Client)
 ├─ sensor-service/      Spring Boot REST API + UDP veri alımı
@@ -40,8 +41,8 @@ npm run dev
 **Seçenek B: Backend yerelde** (geliştirme için; gereksinimler: JDK 21, Maven, Node.js, Docker)
 
 ```bash
-# 1) Sadece veritabanı
-docker compose up -d postgres
+# 1) Sadece altyapı (Docker'daki backend çalışıyorsa önce: docker compose stop sensor-service)
+docker compose up -d postgres redis
 
 # 2) Backend  →  http://localhost:8080
 cd sensor-service
@@ -50,7 +51,15 @@ mvn spring-boot:run
 # 3) Frontend: Seçenek A'daki gibi
 ```
 
-Testler (Docker açık olmalı; testler kendi PostgreSQL konteynerini başlatır):
+Sensör verisi göndermek için (repo kökünden, PowerShell):
+
+```powershell
+java simulator/SensorSimulator.java --sensors ((Invoke-RestMethod http://localhost:8080/api/sensors).id -join ",")
+```
+
+Simülatör kayıp, tekrar, sıra karışması, bozuk paket ve yeniden başlama senaryolarını da üretebilir; seçenekler dosyanın başında açıklanmıştır.
+
+Testler (Docker açık olmalı; testler kendi PostgreSQL ve Redis konteynerlerini başlatır):
 
 ```bash
 cd sensor-service
@@ -66,6 +75,7 @@ mvn test
 | `GET` | `/api/sensors/{id}` | Tek sensörü getirir | `404` |
 | `POST` | `/api/sensors/{id}/deactivate` | Sensörü pasifleştirir | `404`, `409` zaten pasif veya eşzamanlı değişiklik |
 | `DELETE` | `/api/sensors/{id}` | Sensörü siler, `204` döner (gövdesiz) | `404` |
+| `GET` | `/api/sensors/{id}/latest` | Son ölçüm (`sequence`, `timestamp`, `value`). Sensör 10 saniyedir veri göndermiyorsa `204` | `404` |
 
 Hata cevapları RFC 9457 `ProblemDetail` formatındadır. Doğrulama hatalarında `errors` alanı, hangi alanın neden reddedildiğini listeler.
 
@@ -93,7 +103,15 @@ $udp.Send($p, $p.Length, "localhost", 9876)
 - **Doğrulama istemcide ve sunucuda.** Form, hatalı girdiyi istek atmadan yakalar; asıl kural sunucudadır. Sunucunun döndüğü alan hataları formda ilgili alanın altında, diğer hatalar (ör. `409`) formun üstünde gösterilir. İstek sürerken gönder butonu kilitlenir.
 - **Yapılandırma ortam değişkeniyle.** Aynı Docker imajı her ortamda çalışır; veritabanı adresi imaja gömülmez, `SPRING_DATASOURCE_URL` ile dışarıdan verilir. Backend, PostgreSQL'in healthcheck'i geçmesini bekleyerek başlar. Konteyner root olmayan bir kullanıcıyla çalışır; uygulama kendi jar dosyasını değiştiremez.
 - **Protokol çözümü ağ katmanından ayrı.** `PacketCodec` başlığı doğrular ve mesaj tipine göre ilgili çözücüyü seçer; Netty'ye bağımlı değildir ve ağ olmadan birim testiyle doğrulanır. Yeni bir mesaj tipi, yalnızca yeni bir `PayloadDecoder` bileşeni yazılarak eklenir. Bozuk paketler loglanıp atılır, sunucu çalışmaya devam eder.
+- **Sıra kontrolü ve yazma tek adımda.** Son ölçüm Redis'te sensör başına bir hash olarak tutulur. Sıra numarası karşılaştırması, yazma ve TTL bir Lua script'iyle Redis içinde atomik olarak yapılır; böylece eski, tekrar eden ya da sırası karışmış paketler, birden fazla servis örneğinde bile güncel değerin üzerine yazamaz. 10 saniyelik TTL hem "sessiz sensör" durumunu hem de yeniden başlayan sensörün kabul edilmesini sağlar.
+- **Simülatör sunucudan bağımsız.** Simülatör, sunucunun kodunu kullanmadan yalnızca ICD'ye göre yazılmıştır ve ICD'deki örnek pakete karşı kendini doğrular. Bu sayede iki tarafta aynı yanlış anlama birbirini gizleyemez.
 - **CORS yerine proxy.** Geliştirmede arayüz, istekleri Vite proxy üzerinden backend'e iletir; arayüz kodunda backend adresi yer almaz.
+
+## Bilinen sınırlar
+
+- **Redis yazma işlemi Netty event loop thread'inde, senkron yapılıyor.** Yüksek paket hızında ya da Redis yavaşladığında UDP okumayı geciktirir. Etkisi 500 ms komut zaman aşımıyla sınırlandırıldı; Kafka aşamasında ölçümler asenkron olarak Kafka'ya gönderilecek ve Redis yazma işi tüketici tarafına taşınacak.
+- **UDP ile gelen `sensorId` doğrulanmıyor.** Veritabanında olmayan ya da pasif bir sensörün verisi de kabul ediliyor.
+- **Arayüz son değeri 2 saniyede bir sorgulayarak (polling) alıyor.** WebSocket aşamasında sunucudan itme (push) yöntemine geçilecek.
 
 ## Yol haritası
 
@@ -102,7 +120,7 @@ $udp.Send($p, $p.Length, "localhost", 9876)
 - [x] React arayüzü: listeleme ve pasifleştirme
 - [x] Sensör ekleme formu
 - [x] Servisin Docker imajı
-- [ ] Sensörlerden UDP ile veri alımı (Netty), son durum için Redis
+- [x] Sensörlerden UDP ile veri alımı (Netty), son durum için Redis
 - [ ] Kafka ile olay yayını ve ayrı bir alarm servisi
 - [ ] WebSocket ile canlı izleme ekranı
 - [ ] Elasticsearch ile sensör olaylarında arama

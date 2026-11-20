@@ -88,7 +88,7 @@ function App() {
         {error && <Alert severity="error">{error}</Alert>}
         <Stack spacing={2}>
           {sensors.map(s => (
-            <SensorCard key={s.id} name={s.name} type={s.type} active={s.active} onDeactivate={() => deactivate(s.id)} onRemove={() => remove(s.id)}/>
+            <SensorCard key={s.id} id={s.id} name={s.name} type={s.type} active={s.active} onDeactivate={() => deactivate(s.id)} onRemove={() => remove(s.id)}/>
           ))}
         </Stack>
       </Container>

@@ -15,3 +15,9 @@ export type CreateSensorRequest = {
     latitude: number;
     longitude: number;
 }
+
+export type LatestMeasurement = {
+    sequence: number;
+    timestamp: string;
+    value: number;
+};

@@ -1,4 +1,4 @@
-import type { Sensor, CreateSensorRequest } from './types';
+import type { Sensor, CreateSensorRequest, LatestMeasurement } from './types';
 import type { ProblemDetail } from '../../shared/types';
 import { ApiError } from '../../shared/ApiError';
 
@@ -45,6 +45,20 @@ export async function removeSensor(id: number): Promise<void> {
     const response = await fetch(`/api/sensors/${id}`, { method: "DELETE" });
 
     await responseChecker(response);
+}
+
+export async function fetchLatest(id: number): Promise<LatestMeasurement | null> {
+
+    const response = await fetch(`/api/sensors/${id}/latest`);
+
+    await responseChecker(response);
+
+    if(response.status === 204) {
+
+        return null;
+    }
+    
+    return response.json();
 }
 
 async function responseChecker(response: Response) {
