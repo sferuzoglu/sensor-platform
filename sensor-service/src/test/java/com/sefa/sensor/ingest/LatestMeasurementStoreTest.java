@@ -10,15 +10,12 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.sefa.sensor.TestcontainersConfiguration;
+import com.sefa.sensor.IntegrationTest;
 
-@SpringBootTest(properties = "sensor.ingest.udp-port=0")
-@Import(TestcontainersConfiguration.class)
+@IntegrationTest
 public class LatestMeasurementStoreTest {
 
     private static final long SENSOR_ID = 1;

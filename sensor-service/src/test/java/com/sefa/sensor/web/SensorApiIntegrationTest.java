@@ -13,15 +13,12 @@ import java.time.Instant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.sefa.sensor.TestcontainersConfiguration;
+import com.sefa.sensor.IntegrationTest;
 import com.sefa.sensor.domain.GeoLocation;
 import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.domain.SensorRepository;
@@ -29,9 +26,7 @@ import com.sefa.sensor.domain.SensorType;
 import com.sefa.sensor.ingest.LatestMeasurementStore;
 import com.sefa.sensor.ingest.Measurement;
 
-@SpringBootTest(properties = "sensor.ingest.udp-port=0")
-@AutoConfigureMockMvc
-@Import(TestcontainersConfiguration.class)
+@IntegrationTest
 public class SensorApiIntegrationTest {
 
     @Autowired

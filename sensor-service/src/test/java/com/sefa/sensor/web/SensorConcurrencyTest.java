@@ -7,18 +7,15 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
-import com.sefa.sensor.TestcontainersConfiguration;
+import com.sefa.sensor.IntegrationTest;
 import com.sefa.sensor.domain.GeoLocation;
 import com.sefa.sensor.domain.Sensor;
 import com.sefa.sensor.domain.SensorRepository;
 import com.sefa.sensor.domain.SensorType;
 
-@SpringBootTest(properties = "sensor.ingest.udp-port=0")
-@Import(TestcontainersConfiguration.class)
+@IntegrationTest
 public class SensorConcurrencyTest {
 
     @Autowired
