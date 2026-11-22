@@ -20,17 +20,18 @@ public class UdpServer implements SmartLifecycle {
 
     private static final Logger log = LoggerFactory.getLogger(UdpServer.class);
 
-    private final LatestMeasurementStore store;
     private final PacketCodec codec;
     private final int port;
+    private final MeasurementPublisher measurementPublisher;
 
     private EventLoopGroup group;
     private Channel channel;
     private volatile boolean running;
 
-    public UdpServer(PacketCodec codec, LatestMeasurementStore store, @Value("${sensor.ingest.udp-port}") int port) {
+    public UdpServer(PacketCodec codec, MeasurementPublisher measurementPublisher,
+            @Value("${sensor.ingest.udp-port}") int port) {
         this.codec = codec;
-        this.store = store;
+        this.measurementPublisher = measurementPublisher;
         this.port = port;
     }
 
@@ -42,7 +43,7 @@ public class UdpServer implements SmartLifecycle {
         Bootstrap bootstrap = new Bootstrap()
                 .group(group)
                 .channel(NioDatagramChannel.class)
-                .handler(new MeasurementHandler(codec, store));
+                .handler(new MeasurementHandler(codec, measurementPublisher));
 
         try {
             channel = bootstrap.bind(port).sync().channel();
