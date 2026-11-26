@@ -10,29 +10,42 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Simulates sensors that send measurements over UDP as defined in docs/protocol.md.
+ * Simulates sensors that send measurements over UDP as defined in
+ * docs/protocol.md.
  *
- * Written independently from sensor-service on purpose: like a real device, it shares
- * nothing with the server except the ICD. A misunderstanding of the format in one side
+ * Written independently from sensor-service on purpose: like a real device, it
+ * shares
+ * nothing with the server except the ICD. A misunderstanding of the format in
+ * one side
  * therefore cannot hide the same misunderstanding in the other.
  *
  * Run (Java 21, no build step):
- *   java simulator/SensorSimulator.java
- *   java simulator/SensorSimulator.java --sensors 1,2,3 --interval-ms 500 --drop 0.1
- *   java simulator/SensorSimulator.java --self-test
+ * java simulator/SensorSimulator.java
+ * java simulator/SensorSimulator.java --sensors 1,2,3 --interval-ms 500 --drop
+ * 0.1
+ * java simulator/SensorSimulator.java --self-test
  *
  * Options:
- *   --host <name>          target host                      (default localhost)
- *   --port <n>             target UDP port                  (default 9876)
- *   --sensors <ids>        comma separated sensor ids       (default 1,2,3)
- *   --interval-ms <n>      time between rounds              (default 1000)
- *   --count <n>            rounds to send, 0 = forever      (default 0)
- *   --drop <p>             probability a packet is lost     (default 0)
- *   --duplicate <p>        probability a packet is sent twice
- *   --reorder <p>          probability a packet is held back and sent after the next one
- *   --corrupt <p>          probability the magic is broken
- *   --restart-after <n>    a sensor restarts (sequence back to 0) every n packets, 0 = never
- *   --self-test            check the encoder against the ICD example packet and exit
+ * --host <name> target host (default localhost)
+ * --port <n> target UDP port (default 9876)
+ * --sensors <ids> comma separated sensor ids (default 1,2,3)
+ * --interval-ms <n> time between rounds (default 1000)
+ * --count <n> rounds to send, 0 = forever (default 0)
+ * --drop
+ * <p>
+ * probability a packet is lost (default 0)
+ * --duplicate
+ * <p>
+ * probability a packet is sent twice
+ * --reorder
+ * <p>
+ * probability a packet is held back and sent after the next one
+ * --corrupt
+ * <p>
+ * probability the magic is broken
+ * --restart-after <n> a sensor restarts (sequence back to 0) every n packets, 0
+ * = never
+ * --self-test check the encoder against the ICD example packet and exit
  */
 public class SensorSimulator {
 
@@ -43,21 +56,21 @@ public class SensorSimulator {
     static final int PAYLOAD_SIZE = 16;
     static final int PACKET_SIZE = 31;
 
-    // ICD section 3 example: sensor 42, sequence 7, 2026-01-01T00:00:00Z, value 21.5
-    static final String ICD_EXAMPLE_HEX =
-            "534601000100100000002a00000007" + "0000019b76daa800" + "4035800000000000";
+    // ICD section 3 example: sensor 42, sequence 7, 2026-01-01T00:00:00Z, value
+    // 21.5
+    static final String ICD_EXAMPLE_HEX = "534601000100100000002a00000007" + "0000019b76daa800" + "4035800000000000";
 
     /** Encodes one measurement packet exactly as described in the ICD. */
     static byte[] encode(long sensorId, long sequence, Instant timestamp, double value) {
-        ByteBuffer buffer = ByteBuffer.allocate(PACKET_SIZE);   // big-endian by default
-        buffer.putShort((short) MAGIC);                         // uint16
-        buffer.put((byte) VERSION);                             // uint8
-        buffer.putShort((short) TYPE_MEASUREMENT);              // uint16
-        buffer.putShort((short) PAYLOAD_SIZE);                  // uint16
-        buffer.putInt((int) sensorId);                          // uint32
-        buffer.putInt((int) sequence);                          // uint32
-        buffer.putLong(timestamp.toEpochMilli());               // int64
-        buffer.putDouble(value);                                // float64
+        ByteBuffer buffer = ByteBuffer.allocate(PACKET_SIZE); // big-endian by default
+        buffer.putShort((short) MAGIC); // uint16
+        buffer.put((byte) VERSION); // uint8
+        buffer.putShort((short) TYPE_MEASUREMENT); // uint16
+        buffer.putShort((short) PAYLOAD_SIZE); // uint16
+        buffer.putInt((int) sensorId); // uint32
+        buffer.putInt((int) sequence); // uint32
+        buffer.putLong(timestamp.toEpochMilli()); // int64
+        buffer.putDouble(value); // float64
         return buffer.array();
     }
 
@@ -67,7 +80,7 @@ public class SensorSimulator {
         long sequence;
         long sentSinceRestart;
         double value;
-        byte[] heldBack;          // packet delayed to simulate reordering
+        byte[] heldBack; // packet delayed to simulate reordering
 
         Sensor(long id, double startValue) {
             this.id = id;
@@ -85,7 +98,7 @@ public class SensorSimulator {
         Random random = new Random();
         List<Sensor> sensors = new ArrayList<>();
         for (long id : o.sensorIds) {
-            sensors.add(new Sensor(id, 15 + random.nextDouble() * 10));   // start between 15 and 25
+            sensors.add(new Sensor(id, 15 + random.nextDouble() * 10)); // start between 15 and 25
         }
 
         InetAddress address = InetAddress.getByName(o.host);
@@ -103,7 +116,7 @@ public class SensorSimulator {
 
                     s.sequence++;
                     s.sentSinceRestart++;
-                    s.value += (random.nextDouble() - 0.5);   // random walk, +-0.5 per step
+                    s.value += (random.nextDouble() - 0.5); // random walk, +-0.5 per step
 
                     byte[] packet = encode(s.id, s.sequence, Instant.now(), s.value);
                     String line = String.format("sensor %d seq %d value %.2f", s.id, s.sequence, s.value);
@@ -146,7 +159,9 @@ public class SensorSimulator {
         socket.send(new DatagramPacket(packet, packet.length, address, port));
     }
 
-    /** Golden-vector check: the encoder must produce the ICD example byte for byte. */
+    /**
+     * Golden-vector check: the encoder must produce the ICD example byte for byte.
+     */
     static boolean selfTest() {
         byte[] actual = encode(42, 7, Instant.parse("2026-01-01T00:00:00Z"), 21.5);
         String actualHex = HexFormat.of().formatHex(actual);
@@ -161,7 +176,7 @@ public class SensorSimulator {
     static final class Options {
         String host = "localhost";
         int port = 9876;
-        long[] sensorIds = {1, 2, 3};
+        long[] sensorIds = { 27, 28, 29 };
         long intervalMs = 1000;
         long count = 0;
         double drop, duplicate, reorder, corrupt;
